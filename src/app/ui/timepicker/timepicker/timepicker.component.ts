@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnDestroy } from '@angular/core';
+import { Component, forwardRef, Input, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import * as moment from 'moment';
@@ -19,11 +19,15 @@ import { debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs/oper
 })
 export class TimepickerComponent implements OnDestroy, ControlValueAccessor {
 
+  @Input() labelName: string;
+
   private timeReg = new RegExp('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
 
+  public time: string;
   public inputChange$ = new Subject<string>();
 
   private destroy$ = new Subject<void>();
+  private disabled = false;
 
   constructor() {
     this.inputChange$
@@ -54,10 +58,11 @@ export class TimepickerComponent implements OnDestroy, ControlValueAccessor {
   }
 
   public setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
   }
 
   public writeValue(time: Date): void {
-    this.onTimeChange(time);
+      this.time = time ? moment(time).format('HH:mm') : '';
   }
 
   public ngOnDestroy() {

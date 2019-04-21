@@ -11,6 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 export class AppComponent implements OnDestroy {
 
   public timeControl = new FormControl('', { updateOn: 'change' });
+  public timeControlRequired = new FormControl(new Date(), { updateOn: 'change' });
 
   private destroy$ = new Subject<void>();
 
@@ -19,7 +20,16 @@ export class AppComponent implements OnDestroy {
       .pipe(
         takeUntil(this.destroy$)
       )
-      .subscribe((time: Date) => console.log('AppComponent time: ' + time));
+      .subscribe((time: Date) => {
+        console.log('timeControl time: ' + time);
+        this.timeControl.disable({ emitEvent: false });
+      });
+
+    this.timeControlRequired.valueChanges
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe((time: Date) => console.log('timeControlRequired time: ' + time));
   }
 
   ngOnDestroy() {

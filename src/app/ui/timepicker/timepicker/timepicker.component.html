@@ -1,6 +1,13 @@
-<input
-  type="text"
-  mask="Hh:m0"
-  class="timepicker__input"
-  (input)="inputChange$.next($event.target.value)"
->
+<div class="timepicker">
+  <label for="time">{{ labelName }}</label>
+  <input
+    [value]="time"
+    (input)="inputChange$.next($event.target.value)"
+    [class.timepicker__input_disabled]="disabled"
+    mask="Hh:m0"
+    type="text"
+    class="timepicker__input"
+    id="time"
+  >
+</div>
+

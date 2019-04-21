@@ -1,7 +1,15 @@
 .timepicker {
 
+  display: flex;
+  flex-direction: column;
+
   &__input {
     padding: 15px;
     font-size: 20px;
+
+    &_disabled {
+      pointer-events: none;
+      background-color: aliceblue;
+    }
   }
 }
