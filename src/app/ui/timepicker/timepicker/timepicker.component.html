@@ -4,10 +4,15 @@
     [value]="time"
     (input)="inputChange$.next($event.target.value)"
     [class.timepicker__input_disabled]="disabled"
+    [class.timepicker__input_required]="required"
     mask="Hh:m0"
     type="text"
     class="timepicker__input"
     id="time"
   >
+  <span *ngIf="messagesByStatus"
+    class="timepicker__message"
+    [class.timepicker__message_invalid]="required"
+  > {{ messagesByStatus['required'] }} </span>
 </div>
 

@@ -1,5 +1,5 @@
 import { Component, forwardRef, Input, OnDestroy } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator } from '@angular/forms';
 
 import * as moment from 'moment';
 import { Subject } from 'rxjs';
@@ -14,20 +14,28 @@ import { debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs/oper
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => TimepickerComponent),
       multi: true
+    },
+    {
+      provide: NG_VALIDATORS,
+      useExisting: forwardRef(() => TimepickerComponent),
+      multi: true
     }
   ]
 })
-export class TimepickerComponent implements OnDestroy, ControlValueAccessor {
+export class TimepickerComponent implements OnDestroy, ControlValueAccessor, Validator {
 
   @Input() labelName: string;
+  @Input() messagesByStatus?: unknown;
 
   private timeReg = new RegExp('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
 
   public time: string;
   public inputChange$ = new Subject<string>();
 
+  public disabled = false;
+  public required = false;
+
   private destroy$ = new Subject<void>();
-  private disabled = false;
 
   constructor() {
     this.inputChange$
@@ -68,6 +76,15 @@ export class TimepickerComponent implements OnDestroy, ControlValueAccessor {
   public ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  registerOnValidatorChange(fn: () => void): void {
+  }
+
+  validate(control: AbstractControl): ValidationErrors | null {
+    this.required = !!(control.errors && control.errors.some(e => e === 'required'));
+
+    return null;
   }
 
 }

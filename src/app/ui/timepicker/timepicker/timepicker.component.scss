@@ -11,5 +11,18 @@
       pointer-events: none;
       background-color: aliceblue;
     }
+
+    &_required {
+      color: firebrick;
+      border-color: firebrick;
+    }
+  }
+
+  &__message {
+    font-size: 14px;
+
+    &_invalid {
+      color: firebrick;
+    }
   }
 }
