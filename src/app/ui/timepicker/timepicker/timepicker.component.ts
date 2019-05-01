@@ -1,9 +1,9 @@
 import { Component, forwardRef, Input, OnDestroy } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import * as moment from 'moment';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cva-timepicker',
@@ -14,18 +14,12 @@ import { debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs/oper
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => TimepickerComponent),
       multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => TimepickerComponent),
-      multi: true
     }
   ]
 })
-export class TimepickerComponent implements OnDestroy, ControlValueAccessor, Validator {
+export class TimepickerComponent implements OnDestroy, ControlValueAccessor {
 
   @Input() labelName: string;
-  @Input() messagesByStatus?: unknown;
 
   private timeReg = new RegExp('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
 
@@ -33,28 +27,28 @@ export class TimepickerComponent implements OnDestroy, ControlValueAccessor, Val
   public inputChange$ = new Subject<string>();
 
   public disabled = false;
-  public required = false;
 
   private destroy$ = new Subject<void>();
 
   constructor() {
     this.inputChange$
       .pipe(
-        distinctUntilChanged(),
-        debounceTime(200),
-        filter((timeString: string) => this.timeReg.test(timeString)),
+        filter((timeString: string) => (this.timeReg.test(timeString)) || !timeString),
         takeUntil(this.destroy$)
       )
       .subscribe((timeString: string) => this.updateTime(timeString));
   }
 
-  private onTimeChange: (time: Date) => void = (time: Date) => {};
-
-  private onTouched: (time: Date) => void = (time: Date) => {};
+  public ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   public updateTime(timeString: string): void {
-    this.onTimeChange(moment(timeString, 'LT').toDate());
-    this.onTouched(moment(timeString, 'LT').toDate());
+    const time = timeString && moment(timeString, 'LT').toDate() || null;
+
+    this.onTimeChange(time);
+    this.onTouched(time);
   }
 
   public registerOnChange(fn: (time: Date) => void): void {
@@ -73,18 +67,7 @@ export class TimepickerComponent implements OnDestroy, ControlValueAccessor, Val
       this.time = time ? moment(time).format('HH:mm') : '';
   }
 
-  public ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+  private onTimeChange: (time: Date) => void = (time: Date) => {};
 
-  registerOnValidatorChange(fn: () => void): void {
-  }
-
-  validate(control: AbstractControl): ValidationErrors | null {
-    this.required = !!(control.errors && control.errors.some(e => e === 'required'));
-
-    return null;
-  }
-
+  private onTouched: (time: Date) => void = (time: Date) => {};
 }
